@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::sysvar;
 use anchor_spl::token_interface::Mint;
 
 pub mod errors;
@@ -35,6 +36,102 @@ pub mod por {
         config.log_state = ctx.accounts.log_state.key();
         Ok(())
     }
+
+    pub fn submit_attestation(
+        ctx: Context<SubmitAttestation>,
+        args: SubmitAttestationArgs,
+    ) -> Result<()> {
+        let config = &mut ctx.accounts.config;
+        let mint = &ctx.accounts.mint;
+
+        // structural guards
+        require_keys_eq!(mint.key(), config.mint, PorError::MintMismatch);
+        require!(
+            args.schema_version == config.schema_version,
+            PorError::MessageMismatch
+        );
+        require!(
+            args.sequence == config.next_sequence,
+            PorError::SequenceMismatch
+        );
+        require!(args.decimals == mint.decimals, PorError::DecimalsMismatch);
+
+        // conditions (a)(b)(c) of §4.7.1 — authentication by introspection
+        let expected = message::build_message(config, mint.decimals, &args);
+        let signer_pubkey = introspection::verify_ed25519_introspection(
+            &ctx.accounts.instructions_sysvar,
+            &config.oracle_authority,
+            &expected,
+        )?;
+
+        // coverage reconciliation (§4.6): the program reads the supply ITSELF
+        // at the execution slot; checked arithmetic (overflow aborts)
+        let supply = mint.supply;
+        let exponent = args
+            .decimals
+            .checked_sub(config.reserve_decimals)
+            .ok_or(PorError::Overflow)?;
+        let factor = 10u64
+            .checked_pow(u32::from(exponent))
+            .ok_or(PorError::Overflow)?;
+        let r_norm = args
+            .total_reservas
+            .checked_mul(factor)
+            .ok_or(PorError::Overflow)?;
+        // NEVER strict equality: over-collateralization is compliant
+        let status = if r_norm >= supply {
+            STATUS_OK
+        } else {
+            STATUS_DIVERGENTE
+        };
+
+        // deterministic MMR append computed BY the program; the interface
+        // carries no peaks from the caller (there is no such field in args).
+        // Leaf value = SHA-256(canonical message bytes); sum_tree then applies
+        // its own MMR leaf domain (0x02) on top.
+        let leaf = solana_sha256_hasher::hash(&expected).to_bytes();
+        let log = &mut ctx.accounts.log_state;
+        let mut mmr = sum_tree::Mmr {
+            peaks: log.peaks[..usize::from(log.peak_count)].to_vec(),
+            leaf_count: log.leaf_count,
+        };
+        mmr.append(&leaf);
+        require!(mmr.peaks.len() <= MAX_PEAKS, PorError::LogFull);
+        log.peaks = [[0u8; 32]; MAX_PEAKS];
+        log.peaks[..mmr.peaks.len()].copy_from_slice(&mmr.peaks);
+        log.peak_count = mmr.peaks.len() as u8;
+        log.leaf_count = mmr.leaf_count;
+
+        // AuditRecord persistence
+        let clock = Clock::get()?;
+        let record = &mut ctx.accounts.audit_record;
+        record.sequence = args.sequence;
+        record.merkle_root = args.merkle_root;
+        record.total_reservas = args.total_reservas;
+        record.supply_at_ingestion = supply;
+        record.ingestion_slot = clock.slot;
+        record.ipfs_cid = args.ipfs_cid.clone();
+        record.dataset_sha256 = args.dataset_sha256;
+        record.signer_pubkey = signer_pubkey;
+        record.status = status;
+
+        config.next_sequence = config
+            .next_sequence
+            .checked_add(1)
+            .ok_or(PorError::Overflow)?;
+
+        emit!(AttestationSubmitted {
+            mint: mint.key(),
+            sequence: args.sequence,
+            merkle_root: args.merkle_root,
+            total_reservas: args.total_reservas,
+            supply_at_ingestion: supply,
+            ingestion_slot: clock.slot,
+            status,
+            signer_pubkey,
+        });
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -59,4 +156,42 @@ pub struct InitializeConfig<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(args: SubmitAttestationArgs)]
+pub struct SubmitAttestation<'info> {
+    #[account(mut, seeds = [b"config", mint.key().as_ref()], bump)]
+    pub config: Account<'info, PorConfig>,
+    pub mint: InterfaceAccount<'info, Mint>,
+    #[account(
+        init,
+        payer = payer,
+        space = AuditRecord::SPACE,
+        seeds = [b"audit", mint.key().as_ref(), &args.sequence.to_le_bytes()],
+        bump
+    )]
+    pub audit_record: Account<'info, AuditRecord>,
+    #[account(mut, seeds = [b"log", mint.key().as_ref()], bump)]
+    pub log_state: Account<'info, LogState>,
+    /// Pays rent for the AuditRecord. Authentication does NOT depend on it:
+    /// it rests entirely on the introspection (relayer-friendly).
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK: address pinned to the Instructions sysvar; read only via *_checked APIs.
+    #[account(address = sysvar::instructions::ID)]
+    pub instructions_sysvar: UncheckedAccount<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[event]
+pub struct AttestationSubmitted {
+    pub mint: Pubkey,
+    pub sequence: u64,
+    pub merkle_root: [u8; 32],
+    pub total_reservas: u64,
+    pub supply_at_ingestion: u64,
+    pub ingestion_slot: u64,
+    pub status: u8,
+    pub signer_pubkey: Pubkey,
 }

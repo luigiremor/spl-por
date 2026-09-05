@@ -148,3 +148,85 @@ pub fn ed25519_ix(oracle: &Keypair, message: &[u8]) -> Instruction {
         data: ed25519_ix_data(&oracle.pubkey().to_bytes(), &sig, message),
     }
 }
+
+pub fn audit_pda(env: &Env, sequence: u64) -> Pubkey {
+    Pubkey::find_program_address(
+        &[b"audit", env.mint.as_ref(), &sequence.to_le_bytes()],
+        &por::ID,
+    )
+    .0
+}
+
+/// Default args: mint decimals 6, reserve_decimals 2 => factor 10^4.
+/// total_reservas = 200 cents => R_norm = 2_000_000.
+pub fn default_args(sequence: u64) -> por::message::SubmitAttestationArgs {
+    por::message::SubmitAttestationArgs {
+        schema_version: por::state::SCHEMA_VERSION,
+        sequence,
+        merkle_root: [7u8; 32],
+        total_reservas: 200,
+        decimals: 6,
+        ipfs_cid: "bafy-test-cid".to_string(),
+        dataset_sha256: [9u8; 32],
+    }
+}
+
+/// INDEPENDENT reconstruction of the message (straight from sum_tree, not
+/// through build_message): the test must not reuse the code under test.
+pub fn expected_message(env: &Env, args: &por::message::SubmitAttestationArgs) -> Vec<u8> {
+    let config = get_config(env);
+    sum_tree::AttestationMessage {
+        schema_version: config.schema_version,
+        mint: env.mint.to_bytes(),
+        sequence: args.sequence,
+        merkle_root: args.merkle_root,
+        total_reservas: args.total_reservas,
+        currency: config.currency,
+        decimals: args.decimals,
+        reserve_decimals: config.reserve_decimals,
+        ipfs_cid: args.ipfs_cid.clone(),
+        dataset_sha256: args.dataset_sha256,
+    }
+    .canonical_bytes()
+}
+
+pub fn submit_ix(env: &Env, args: por::message::SubmitAttestationArgs) -> Instruction {
+    Instruction {
+        program_id: por::ID,
+        accounts: por::accounts::SubmitAttestation {
+            config: env.config_pda,
+            mint: env.mint,
+            audit_record: audit_pda(env, args.sequence),
+            log_state: env.log_pda,
+            payer: env.payer.pubkey(),
+            instructions_sysvar: solana_sdk::sysvar::instructions::id(),
+            system_program: solana_sdk::system_program::id(),
+        }
+        .to_account_metas(None),
+        data: por::instruction::SubmitAttestation { args }.data(),
+    }
+}
+
+/// TWO-instruction transaction: #0 Ed25519 (precompile) + #1 submit_attestation.
+pub fn send_submit(
+    env: &mut Env,
+    oracle: &Keypair,
+    args: por::message::SubmitAttestationArgs,
+) -> Result<litesvm::types::TransactionMetadata, litesvm::types::FailedTransactionMetadata> {
+    let msg = expected_message(env, &args);
+    let ix0 = ed25519_ix(oracle, &msg);
+    let ix1 = submit_ix(env, args);
+    env.svm.expire_blockhash(); // allows resending identical txs back to back
+    let tx = Transaction::new_signed_with_payer(
+        &[ix0, ix1],
+        Some(&env.payer.pubkey()),
+        &[&env.payer],
+        env.svm.latest_blockhash(),
+    );
+    env.svm.send_transaction(tx)
+}
+
+pub fn get_record(env: &Env, sequence: u64) -> por::state::AuditRecord {
+    let acc = env.svm.get_account(&audit_pda(env, sequence)).unwrap();
+    por::state::AuditRecord::try_deserialize(&mut acc.data.as_slice()).unwrap()
+}
