@@ -2,9 +2,11 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::Mint;
 
 pub mod errors;
+pub mod message;
 pub mod state;
 
 pub use errors::PorError;
+pub use message::*;
 pub use state::*;
 
 declare_id!("6KpWoEs5mAdHGpVffKXd2JrE7PRjVa2YxQbCeRvzsa9Y");
