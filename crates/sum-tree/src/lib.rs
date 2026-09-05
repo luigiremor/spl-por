@@ -6,10 +6,12 @@
 //! Academic prototype; not audited, not production-ready.
 
 mod hash;
+mod proof;
 mod tree;
 
 pub use hash::{
     leaf_hash, node_hash, LEAF_DOMAIN, MMR_BAG_DOMAIN, MMR_LEAF_DOMAIN, MMR_NODE_DOMAIN,
     NODE_DOMAIN,
 };
+pub use proof::{prove, verify_inclusion, InclusionProof, ProofStep, VerifyError};
 pub use tree::{build, SumTree, TreeError};

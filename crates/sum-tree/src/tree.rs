@@ -27,7 +27,6 @@ impl core::fmt::Display for TreeError {
 
 impl std::error::Error for TreeError {}
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub(crate) enum TreeNode {
     Leaf {
