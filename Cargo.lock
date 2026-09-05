@@ -564,6 +564,7 @@ name = "attester"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bs58",
  "clap",
  "hex",
  "serde",
