@@ -1,0 +1,19 @@
+[package]
+name = "attester"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Reference attester for the spl-por proof-of-reserves interface (NOT part of the contribution; exercises the public interface only)"
+
+[[bin]]
+name = "por-attest"
+path = "src/main.rs"
+
+[dependencies]
+sum-tree = { path = "../sum-tree" }
+sha2 = "0.10"
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
