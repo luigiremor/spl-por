@@ -132,6 +132,19 @@ pub mod por {
         });
         Ok(())
     }
+
+    pub fn set_oracle_authority(
+        ctx: Context<SetOracleAuthority>,
+        new_authority: Pubkey,
+    ) -> Result<()> {
+        require_keys_eq!(
+            ctx.accounts.admin.key(),
+            ctx.accounts.config.admin,
+            PorError::Unauthorized
+        );
+        ctx.accounts.config.oracle_authority = new_authority;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -194,4 +207,11 @@ pub struct AttestationSubmitted {
     pub ingestion_slot: u64,
     pub status: u8,
     pub signer_pubkey: Pubkey,
+}
+
+#[derive(Accounts)]
+pub struct SetOracleAuthority<'info> {
+    #[account(mut, seeds = [b"config", config.mint.as_ref()], bump)]
+    pub config: Account<'info, PorConfig>,
+    pub admin: Signer<'info>,
 }
