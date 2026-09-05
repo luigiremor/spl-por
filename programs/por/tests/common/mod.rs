@@ -53,7 +53,8 @@ pub fn setup(supply: u64, decimals: u8) -> Env {
     svm.airdrop(&payer.pubkey(), 10_000_000_000).unwrap();
 
     let mint = Pubkey::new_unique();
-    svm.set_account(mint, mint_account(supply, decimals)).unwrap();
+    svm.set_account(mint, mint_account(supply, decimals))
+        .unwrap();
 
     let (config_pda, _) = Pubkey::find_program_address(&[b"config", mint.as_ref()], &por::ID);
     let (log_pda, _) = Pubkey::find_program_address(&[b"log", mint.as_ref()], &por::ID);

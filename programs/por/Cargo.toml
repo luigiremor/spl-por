@@ -34,5 +34,9 @@ spl-token = "8"
 base64 = "0.22"
 
 # Anchor macros probe cfgs that are not declared features of this crate.
+[lints.clippy]
+# litesvm::types::FailedTransactionMetadata is large by construction (logs + metadata).
+result_large_err = "allow"
+
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))', 'cfg(feature, values("custom-heap", "custom-panic", "anchor-debug"))'] }
