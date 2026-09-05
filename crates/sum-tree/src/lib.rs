@@ -7,6 +7,7 @@
 
 mod attestation;
 mod hash;
+#[cfg(feature = "manifest")]
 mod manifest;
 mod mmr;
 mod proof;
@@ -17,6 +18,7 @@ pub use hash::{
     leaf_hash, node_hash, LEAF_DOMAIN, MMR_BAG_DOMAIN, MMR_LEAF_DOMAIN, MMR_NODE_DOMAIN,
     NODE_DOMAIN,
 };
+#[cfg(feature = "manifest")]
 pub use manifest::{hex32, Manifest};
 pub use mmr::{mmr_leaf_hash, mmr_node_hash, Mmr};
 pub use proof::{prove, verify_inclusion, InclusionProof, ProofStep, VerifyError};
