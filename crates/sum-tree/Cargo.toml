@@ -9,3 +9,4 @@ description = "Merkle sum tree, MMR accumulator and canonical attestation serial
 name = "sum_tree"
 
 [dependencies]
+sha2 = "0.10"
