@@ -18,3 +18,4 @@ serde_json = "1"
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 bs58 = "0.5"
+ed25519-dalek = "=1.0.1" # same version pinned by solana-ed25519-program 2.2.3 (new_ed25519_instruction)

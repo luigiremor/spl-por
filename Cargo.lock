@@ -566,6 +566,7 @@ dependencies = [
  "anyhow",
  "bs58",
  "clap",
+ "ed25519-dalek",
  "hex",
  "serde",
  "serde_json",
