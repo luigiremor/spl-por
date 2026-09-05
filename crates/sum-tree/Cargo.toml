@@ -1,0 +1,11 @@
+[package]
+name = "sum-tree"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Merkle sum tree, MMR accumulator and canonical attestation serialization for a proof-of-reserves PoC"
+
+[lib]
+name = "sum_tree"
+
+[dependencies]
