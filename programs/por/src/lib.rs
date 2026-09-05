@@ -145,6 +145,37 @@ pub mod por {
         ctx.accounts.config.oracle_authority = new_authority;
         Ok(())
     }
+
+    pub fn verify_inclusion(
+        ctx: Context<VerifyInclusion>,
+        account_id: [u8; 32],
+        balance: u64,
+        proof: Vec<ProofStepArg>,
+    ) -> Result<()> {
+        let steps = proof
+            .into_iter()
+            .map(|s| sum_tree::ProofStep {
+                sibling_hash: s.sibling_hash,
+                sibling_sum: s.sibling_sum,
+                sibling_is_left: s.sibling_is_left,
+            })
+            .collect();
+        let record = &ctx.accounts.audit_record;
+        // Same per-node binding rules as stage 1: checked sum, range
+        // 0 <= v <= max_value, comparison with the anchored root and total.
+        sum_tree::verify_inclusion(
+            &account_id,
+            balance,
+            &sum_tree::InclusionProof(steps),
+            &record.merkle_root,
+            record.total_reservas,
+            ctx.accounts.config.max_value,
+        )
+        // enum fixed by the interface contract: a failing proof does not
+        // re-bind (mismatch) to the anchored commitment
+        .map_err(|_| error!(PorError::MessageMismatch))?;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -214,4 +245,22 @@ pub struct SetOracleAuthority<'info> {
     #[account(mut, seeds = [b"config", config.mint.as_ref()], bump)]
     pub config: Account<'info, PorConfig>,
     pub admin: Signer<'info>,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct ProofStepArg {
+    pub sibling_hash: [u8; 32],
+    pub sibling_sum: u64,
+    pub sibling_is_left: bool,
+}
+
+#[derive(Accounts)]
+pub struct VerifyInclusion<'info> {
+    #[account(seeds = [b"config", config.mint.as_ref()], bump)]
+    pub config: Account<'info, PorConfig>,
+    #[account(
+        seeds = [b"audit", config.mint.as_ref(), &audit_record.sequence.to_le_bytes()],
+        bump
+    )]
+    pub audit_record: Account<'info, AuditRecord>,
 }
