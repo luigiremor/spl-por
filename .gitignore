@@ -4,3 +4,5 @@
 node_modules/
 test-ledger/
 .context/
+.localnet-ledger/
+.anchor/
