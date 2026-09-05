@@ -2282,7 +2282,6 @@ dependencies = [
  "base64 0.22.1",
  "litesvm",
  "solana-sdk",
- "solana-sha256-hasher",
  "spl-token",
  "sum-tree",
 ]

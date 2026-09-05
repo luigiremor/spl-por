@@ -87,15 +87,14 @@ pub mod por {
 
         // deterministic MMR append computed BY the program; the interface
         // carries no peaks from the caller (there is no such field in args).
-        // Leaf value = SHA-256(canonical message bytes); sum_tree then applies
-        // its own MMR leaf domain (0x02) on top.
-        let leaf = solana_sha256_hasher::hash(&expected).to_bytes();
+        // Leaf = the attestation merkle_root (monograph §4.5: "the program
+        // absorbs the root as a leaf"); sum_tree applies the 0x02 domain.
         let log = &mut ctx.accounts.log_state;
         let mut mmr = sum_tree::Mmr {
             peaks: log.peaks[..usize::from(log.peak_count)].to_vec(),
             leaf_count: log.leaf_count,
         };
-        mmr.append(&leaf);
+        mmr.append(&args.merkle_root);
         require!(mmr.peaks.len() <= MAX_PEAKS, PorError::LogFull);
         log.peaks = [[0u8; 32]; MAX_PEAKS];
         log.peaks[..mmr.peaks.len()].copy_from_slice(&mmr.peaks);

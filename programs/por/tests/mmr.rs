@@ -28,10 +28,10 @@ fn peaks_match_sum_tree_reference_after_three_appends() {
     for seq in 0..3u64 {
         let mut args = common::default_args(seq);
         args.merkle_root = [seq as u8 + 1; 32]; // distinct leaves
-        let msg = common::expected_message(&env, &args);
+        let root = args.merkle_root;
         common::send_submit(&mut env, &oracle, args).unwrap();
-        // MMR leaf value = SHA-256(canonical message bytes)
-        reference.append(&solana_sdk::hash::hash(&msg).to_bytes());
+        // MMR leaf = the attestation merkle_root (spec §4.5)
+        reference.append(&root);
     }
 
     let log = common::get_log(&env);
