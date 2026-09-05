@@ -118,3 +118,33 @@ pub fn assert_por_error<T: std::fmt::Debug>(
         other => panic!("unexpected error: {other:?}"),
     }
 }
+
+/// Payload of an Ed25519Program instruction with 1 signature and the
+/// (pubkey, sig, msg) triple contained in the instruction itself (indices = u16::MAX).
+pub fn ed25519_ix_data(pubkey: &[u8; 32], signature: &[u8; 64], message: &[u8]) -> Vec<u8> {
+    let pk_off: u16 = 16; // header(2) + offsets(14)
+    let sig_off: u16 = pk_off + 32; // 48
+    let msg_off: u16 = sig_off + 64; // 112
+    let mut data = vec![1u8, 0u8]; // num_signatures = 1, padding
+    data.extend(sig_off.to_le_bytes());
+    data.extend(u16::MAX.to_le_bytes()); // signature_instruction_index
+    data.extend(pk_off.to_le_bytes());
+    data.extend(u16::MAX.to_le_bytes()); // public_key_instruction_index
+    data.extend(msg_off.to_le_bytes());
+    data.extend((message.len() as u16).to_le_bytes());
+    data.extend(u16::MAX.to_le_bytes()); // message_instruction_index
+    data.extend_from_slice(pubkey);
+    data.extend_from_slice(signature);
+    data.extend_from_slice(message);
+    data
+}
+
+/// Complete instruction #0, signed by the oracle keypair (Solana keypairs ARE Ed25519).
+pub fn ed25519_ix(oracle: &Keypair, message: &[u8]) -> Instruction {
+    let sig: [u8; 64] = oracle.sign_message(message).as_ref().try_into().unwrap();
+    Instruction {
+        program_id: solana_sdk::ed25519_program::id(),
+        accounts: vec![],
+        data: ed25519_ix_data(&oracle.pubkey().to_bytes(), &sig, message),
+    }
+}

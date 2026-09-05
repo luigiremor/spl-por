@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token_interface::Mint;
 
 pub mod errors;
+pub mod introspection;
 pub mod message;
 pub mod state;
 
