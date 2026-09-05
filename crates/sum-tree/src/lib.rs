@@ -5,11 +5,13 @@
 //!
 //! Academic prototype; not audited, not production-ready.
 
+mod attestation;
 mod hash;
 mod mmr;
 mod proof;
 mod tree;
 
+pub use attestation::AttestationMessage;
 pub use hash::{
     leaf_hash, node_hash, LEAF_DOMAIN, MMR_BAG_DOMAIN, MMR_LEAF_DOMAIN, MMR_NODE_DOMAIN,
     NODE_DOMAIN,
