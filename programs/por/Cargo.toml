@@ -1,0 +1,33 @@
+[package]
+name = "por"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Anchor program anchoring, authenticating and reconciling proof-of-reserves attestations per SPL mint"
+
+# platform-tools >= v1.52 ships Rust 1.89 (edition 2024 deps); solana-cli 2.2.17 defaults to v1.48.
+[package.metadata.solana]
+tools-version = "v1.56"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "por"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = "0.32.1"
+anchor-spl = "0.32.1"
+sum-tree = { path = "../../crates/sum-tree", default-features = false }
+
+[dev-dependencies]
+litesvm = "0.7"
+solana-sdk = "2.3"
+spl-token = "8"
+base64 = "0.22"
