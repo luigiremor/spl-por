@@ -20,7 +20,12 @@ coverage without trusting a privileged party.
   (Ed25519 precompile + Instructions-sysvar introspection, own supply read,
   coverage reconciliation, MMR append), `set_oracle_authority` and the
   optional `verify_inclusion`. Tests run in Rust on LiteSVM.
-- `crates/attester`, `crates/verifier`, `api/`, `scenarios/` — planned.
+- `crates/attester` — reference attester CLI `por-attest` (**not part of the
+  contribution**; exercises the oracle interface): deterministic synthetic
+  snapshot, canonical JSONL dataset, sum tree + JCS manifest via `sum-tree`,
+  Ed25519 signature, IPFS publish (local kubo, fixed CIDv1 profile) and the
+  two-instruction `submit_attestation` transaction.
+- `crates/verifier`, `api/`, `scenarios/` — planned.
 
 ## Build and test
 
@@ -48,6 +53,22 @@ cargo test --workspace  # sum-tree unit tests + por LiteSVM tests
 
 Record in the smoke: `solana-test-validator` version, program id and deploy
 slot (they become environment parameters of the evaluation).
+
+## End-to-end on localnet (etapa 3)
+
+`./scripts/e2e-localnet.sh` boots a fresh validator and a throwaway kubo
+repo, deploys the program, creates a mint (`decimals = 2`), runs
+`initialize_config`, submits a conforming attestation (`status OK`) and then
+an under-collateralized one (`--haircut-bps 100`, `status DIVERGENTE`).
+Needs `ipfs` (kubo), `spl-token` and `jq` on PATH, plus
+`target/deploy/por-keypair.json` matching the id in `Anchor.toml`.
+
+```sh
+por-attest snapshot --n 100 --seed 42 [--haircut-bps 0] --out DIR
+por-attest init-config --mint MINT --keypair KP [--rpc URL]
+por-attest submit --dataset DIR/dataset.jsonl --out DIR --mint MINT --keypair KP [--rpc URL] [--sequence N]
+por-attest show --mint MINT --sequence N [--rpc URL]
+```
 
 ## License
 
