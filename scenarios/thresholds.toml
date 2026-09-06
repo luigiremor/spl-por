@@ -1,0 +1,36 @@
+# Acceptance thresholds — declared BEFORE any measurement run (monograph §5.4.2,
+# falsifiability). Isolated commit; any later change must be justified in the
+# discussion (Cap. 7), never silent. Values adopted from plan 06 as proposed.
+schema = 1
+
+[onchain]
+# Default compute budget per instruction on the target network; the ingestion
+# (ix#1 submit_attestation) must fit it WITHOUT an extra ComputeBudget
+# instruction. Applies to `cu_ingest` (simulate_transaction units_consumed)
+# and to `cu_ingest_landed` (units consumed by the landed transaction).
+cu_ingest_max = 200000
+# Serialized transaction packet limit (bytes). Applies to `tx_size`.
+tx_size_max = 1232
+
+[offchain.verify_time_ms]
+# Ceiling for one COMPLETE off-chain verification per N (dataset integrity +
+# signature + inclusion for every leaf + binding + coverage + MMR), i.e. the
+# verifier pipeline run in-process over a snapshot of the on-chain accounts,
+# excluding network latency and process start-up. Measured in --release on the
+# reference hardware documented in results/hardware.md; median of 10 runs
+# after 3 warm-ups. Applies to `verify_time_ms`. `verify_e2e_ms` (por-verify
+# process + RPC) is recorded for transparency and has no ceiling.
+n10 = 500
+n100 = 500
+n1000 = 1000
+n10000 = 5000
+n100000 = 30000
+
+[proof]
+# O(log n) growth: steps of the inclusion proof for leaf N/2 must lie in
+# [floor(log2 N), ceil(log2 N)] (largest-power-of-two-below split, RFC 6962
+# shape: leaves at two depths) and the size per step is fixed
+# (32-byte hash + 8-byte sum + 1-byte side = 41). Applies to `proof_steps`.
+steps_min = "floor(log2(N))"
+steps_max = "ceil(log2(N))"
+step_bytes = 41
