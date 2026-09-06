@@ -1,0 +1,14 @@
+[package]
+name = "scripts"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Evaluation post-processing for spl-por: criteria confrontation (§1.3 vs §5.5) and LaTeX tables generated from results/ CSVs"
+
+[dependencies]
+toml = "0.8"
+serde = { version = "1", features = ["derive"] }
+
+[[bin]]
+name = "criteria-check"
+path = "criteria-check.rs"
