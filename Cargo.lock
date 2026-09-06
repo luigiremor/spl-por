@@ -3694,10 +3694,22 @@ dependencies = [
 name = "scenarios"
 version = "0.1.0"
 dependencies = [
+ "anchor-lang",
  "attester",
+ "base64 0.22.1",
+ "bincode",
  "hex",
+ "por",
+ "serde_json",
  "sha2 0.10.9",
+ "solana-client",
+ "solana-ed25519-program",
+ "solana-sdk",
+ "solana-system-interface",
+ "spl-token",
  "sum-tree",
+ "time",
+ "verifier",
 ]
 
 [[package]]
