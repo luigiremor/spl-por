@@ -5,7 +5,6 @@ use scenarios::{gen::*, harness::*};
 use solana_sdk::signature::{Keypair, Signer};
 use std::path::Path;
 
-const CSV: &str = "matrix-localnet.csv";
 const N: usize = 10;
 
 /// Config + attestation 0 anchored with supply = R_norm + `extra_supply`.
@@ -37,7 +36,7 @@ fn s09_rotated_key_history_approved() {
     let dir = write_dataset_dir("tmp-s09", &ds, &sig);
     assert_eq!(run_verify(&ctx, 0, Some(&dir)), 0);
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s09_rotated_key_history_approved",
         N,
         "pass",
@@ -60,7 +59,7 @@ fn s14_dataset_one_byte_tamper_rejected() {
         "sha256(dataset) != dataset_sha256 must fail verification"
     );
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s14_dataset_one_byte_tamper_rejected",
         N,
         "pass",
@@ -80,7 +79,7 @@ fn s15_dataset_unavailable_exit2() {
         "unavailability is an operational failure: exit 2, never tacit approval"
     );
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s15_dataset_unavailable_exit2",
         N,
         "pass",
@@ -107,7 +106,7 @@ fn s16_incoherent_status_rejected() {
         "the verifier's own verdict must contradict the recorded status"
     );
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s16_incoherent_status_rejected",
         N,
         "pass",

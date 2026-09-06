@@ -13,6 +13,10 @@ path = "src/bin/por_gen.rs"
 name = "por-measure"
 path = "src/bin/por_measure.rs"
 
+[[bin]]
+name = "por-devnet-run"
+path = "src/bin/por_devnet_run.rs"
+
 [dependencies]
 sum-tree = { path = "../crates/sum-tree" }
 attester = { path = "../crates/attester" }

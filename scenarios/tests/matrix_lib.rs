@@ -3,10 +3,8 @@
 use scenarios::{gen::*, harness::*};
 use sum_tree::{build, leaf_hash, node_hash, prove, verify_inclusion, InclusionProof, ProofStep};
 
-const CSV: &str = "matrix-localnet.csv";
-
 fn pass(name: &str, n: usize) {
-    record(&results_path(CSV), name, n, "pass", 1.0, "bool");
+    record(&matrix_csv(), name, n, "pass", 1.0, "bool");
 }
 
 #[test]

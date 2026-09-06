@@ -3,7 +3,6 @@
 //! public verifier. Requires a validator (scripts/eval-localnet.sh).
 use scenarios::{gen::*, harness::*};
 
-const CSV: &str = "matrix-localnet.csv";
 const N: usize = 100;
 
 /// Config + dataset of N accounts, supply = R_norm * num / den, attestation 0
@@ -34,7 +33,7 @@ fn s01_exact_coverage_ok() {
     assert_eq!(status, por::state::STATUS_OK);
     assert_eq!(exit, 0);
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s01_exact_coverage_ok",
         N,
         "pass",
@@ -54,7 +53,7 @@ fn s02_overcollateralized_ok() {
     );
     assert_eq!(exit, 0);
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s02_overcollateralized_ok",
         N,
         "pass",
@@ -93,7 +92,7 @@ fn s03_undercollateralized_divergent() {
     let dir = write_dataset_dir("tmp-under", &ds, &sign(&ctx.oracle, &msg));
     assert_eq!(run_verify(&ctx, 0, Some(&dir)), 0);
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s03_undercollateralized_divergent",
         N,
         "pass",

@@ -2,7 +2,6 @@
 //! ingestion never reaches the record. Requires a validator.
 use scenarios::{gen::*, harness::*};
 
-const CSV: &str = "matrix-localnet.csv";
 const N: usize = 10;
 
 /// Config with a valid attestation 0 anchored; returns (ctx, tree, dataset).
@@ -39,14 +38,7 @@ fn s04_replay_rejected() {
         1,
         "replay must not advance the log"
     );
-    record(
-        &results_path(CSV),
-        "s04_replay_rejected",
-        N,
-        "pass",
-        1.0,
-        "bool",
-    );
+    record(&matrix_csv(), "s04_replay_rejected", N, "pass", 1.0, "bool");
 }
 
 #[test]
@@ -60,7 +52,7 @@ fn s05_sequence_gap_rejected() {
         "SequenceMismatch = 6000 (0x1770): {err}"
     );
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s05_sequence_gap_rejected",
         N,
         "pass",
@@ -77,7 +69,7 @@ fn s06_wrong_mint_rejected() {
     let other = create_mint(&ctx, ctx.decimals); // a real mint != PorConfig.mint
     rejected(&ctx, &msg, Tamper::WrongMint(other));
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s06_wrong_mint_rejected",
         N,
         "pass",
@@ -97,7 +89,7 @@ fn s07_wrong_decimals_rejected() {
         "DecimalsMismatch = 6001 (0x1771): {err}"
     );
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s07_wrong_decimals_rejected",
         N,
         "pass",
@@ -119,7 +111,7 @@ fn s08_corrupt_signature_rejected() {
         "failure must come from the Ed25519 precompile (ix#0): {err}"
     );
     record(
-        &results_path(CSV),
+        &matrix_csv(),
         "s08_corrupt_signature_rejected",
         N,
         "pass",

@@ -65,10 +65,39 @@ fn payer(rpc: &RpcClient) -> Keypair {
 /// `ClientError` is boxed: clippy's result_large_err (264-byte Err variant).
 pub type SubmitResult = Result<Signature, Box<ClientError>>;
 
+fn is_rate_limit(e: &ClientError) -> bool {
+    let s = e.to_string();
+    s.contains("429") || s.to_lowercase().contains("rate limit") || s.contains("Too Many Requests")
+}
+
+/// `send_and_confirm` tolerant to public-RPC rate limiting (HTTP 429): up to 5
+/// attempts with exponential backoff (500 ms * 2^k) and a fixed 500 ms pause
+/// after every accepted transaction. Program/precompile rejections return
+/// immediately. The signed transaction is reused: the blockhash stays valid
+/// for the whole retry window (~15 s).
+pub fn submit_with_retry(rpc: &RpcClient, tx: &Transaction) -> SubmitResult {
+    let mut delay = Duration::from_millis(500);
+    for attempt in 0..5 {
+        match rpc.send_and_confirm_transaction(tx) {
+            Ok(sig) => {
+                sleep(Duration::from_millis(500));
+                return Ok(sig);
+            }
+            Err(e) if attempt < 4 && is_rate_limit(&e) => {
+                eprintln!("rate limited (attempt {attempt}), backing off {delay:?}");
+                sleep(delay);
+                delay *= 2;
+            }
+            Err(e) => return Err(Box::new(e)),
+        }
+    }
+    unreachable!()
+}
+
 fn send(ctx: &Ctx, ixs: &[Instruction], signers: &[&Keypair]) -> SubmitResult {
     let bh = ctx.rpc.get_latest_blockhash()?;
     let tx = Transaction::new_signed_with_payer(ixs, Some(&ctx.payer.pubkey()), signers, bh);
-    Ok(ctx.rpc.send_and_confirm_transaction(&tx)?)
+    submit_with_retry(&ctx.rpc, &tx)
 }
 
 /// Creates an SPL mint (authority = payer) with `decimals`.
@@ -305,7 +334,7 @@ pub fn wait_finalized(rpc: &RpcClient, sig: &Signature) {
 /// later read (verifier, fixtures) observes it. Rejections surface as `Err`
 /// (preflight simulation) without waiting.
 pub fn submit(ctx: &Ctx, tx: &Transaction) -> SubmitResult {
-    let sig = ctx.rpc.send_and_confirm_transaction(tx)?;
+    let sig = submit_with_retry(&ctx.rpc, tx)?;
     wait_finalized(&ctx.rpc, &sig);
     Ok(sig)
 }
@@ -481,6 +510,12 @@ pub fn record(csv: &Path, scenario: &str, n: usize, metric: &str, value: f64, un
         "{scenario},{n},{metric},{value},{unit},{commit},{cluster},{ts}"
     )
     .unwrap();
+}
+
+/// `results/matrix-<cluster>.csv` (POR_CLUSTER, default localnet).
+pub fn matrix_csv() -> PathBuf {
+    let cluster = std::env::var("POR_CLUSTER").unwrap_or_else(|_| "localnet".into());
+    results_path(&format!("matrix-{cluster}.csv"))
 }
 
 /// Results CSV path relative to the workspace root (tests run with the crate
