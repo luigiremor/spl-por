@@ -12,3 +12,7 @@ serde = { version = "1", features = ["derive"] }
 [[bin]]
 name = "criteria-check"
 path = "criteria-check.rs"
+
+[[bin]]
+name = "gen-tables"
+path = "gen-tables.rs"

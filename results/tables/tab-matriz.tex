@@ -1,0 +1,23 @@
+% gerado por gen-tables a partir de results/matrix-localnet.csv
+\begin{tabular}{l p{5.2cm} p{4.6cm} l}
+\toprule
+\textbf{\#} & \textbf{Cenário} & \textbf{Esperado} & \textbf{Observado} \\
+\midrule
+S01 & Conforme exato ($R_{\mathrm{norm}} = S$) & \texttt{OK}; verificador aprova & conforme o esperado \\
+S02 & Sobrecolateralizado ($R_{\mathrm{norm}} > S$) & \texttt{OK}; verificador aprova & conforme o esperado \\
+S03 & Subcolateralizado ($R_{\mathrm{norm}} < S$) & \texttt{DIVERGENTE} com delta; verificador concorda & conforme o esperado \\
+S04 & \textit{Replay} de \texttt{sequence} antiga & transação rejeitada & conforme o esperado \\
+S05 & \texttt{sequence} com buraco & transação rejeitada & conforme o esperado \\
+S06 & \textit{Mint} trocado & transação rejeitada & conforme o esperado \\
+S07 & \texttt{decimals} divergente do \textit{mint} & transação rejeitada & conforme o esperado \\
+S08 & Assinatura corrompida & transação rejeitada (precompilado) & conforme o esperado \\
+S09 & Histórico assinado por chave rotacionada & aprovado (\texttt{signer\_pubkey} do registro) & conforme o esperado \\
+S10 & Prova de inclusão corrompida & reprovado & conforme o esperado \\
+S11 & Subtotal adulterado (Hu et al.) & reprovado (binding por nó) & conforme o esperado \\
+S12 & \textit{Overflow} de subtotal & abortado (\textit{checked}) & conforme o esperado \\
+S13 & Nó interno como folha & reprovado (separação de domínio) & conforme o esperado \\
+S14 & \textit{Dataset} adulterado em 1 byte & reprovado (\texttt{sha256}) & conforme o esperado \\
+S15 & \textit{Dataset} indisponível & erro operacional (exit 2) & conforme o esperado \\
+S16 & \texttt{status} incoerente em \textit{fixture} & reprovado & conforme o esperado \\
+\bottomrule
+\end{tabular}
