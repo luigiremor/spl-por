@@ -22,6 +22,7 @@ FIXTURES=crates/verifier/tests/fixtures
 KEYPAIR=$FIXTURES/keys/oracle.json
 MINT_KEYPAIR=$FIXTURES/keys/mint.json
 ATTEST=target/debug/por-attest
+VERIFY=target/debug/por-verify
 PROGRAM_ID=$(sed -n 's/^por = "\(.*\)"/\1/p' Anchor.toml)
 
 for bin in cargo anchor solana solana-keygen solana-test-validator spl-token ipfs jq curl; do
@@ -31,14 +32,14 @@ done
   || { echo "[e2e] FAIL: target/deploy/por-keypair.json missing or not $PROGRAM_ID"; exit 1; }
 
 cleanup() {
-  kill "${VALIDATOR_PID:-0}" 2>/dev/null || true
+  kill "${VALIDATOR_PID:-0}" "${IPFS_PID:-0}" 2>/dev/null || true
   rm -rf "$WORK"
 }
 trap cleanup EXIT
 
 echo "[e2e] versions: $(solana-test-validator --version | head -1); $(anchor --version); $(spl-token --version); $(ipfs version)"
 echo "[e2e] building workspace"
-cargo build -q -p attester
+cargo build -q -p attester -p verifier
 anchor build > "$WORK/anchor-build.log" 2>&1 || { cat "$WORK/anchor-build.log"; exit 1; }
 
 echo "[e2e] initializing throwaway kubo repo (no daemon needed: ipfs add works on the repo)"
@@ -155,4 +156,46 @@ wait_finalized "$(echo "$SUB2" | jq -r '.signature')"
 record_dataset "$WORK/s3" dataset-2
 record_fixture history3 "{\"$SLOT0\": \"$TOTAL\", \"$SLOT1\": \"$TOTAL\", \"$SLOT2\": \"$TOTAL\"}"
 
-echo "[e2e] PASS: end-to-end attestation on localnet (OK + DIVERGENTE + third)"
+echo "[e2e] public verification (por-verify) from on-chain state + published datasets"
+# Verdict contract: exit 0 = approved (a coherent DIVERGENTE record IS approved,
+# reported as status_onchain DIVERGENTE), 1 = rejected, 2 = operational error.
+verify() { "$VERIFY" attestation --mint "$MINT" --rpc "$RPC" "$@"; }
+verify --sequence 0 --dataset "$WORK/s1"
+echo "[e2e] por-verify sequence 0: exit 0 (APPROVED, status OK)"
+V1=$(verify --sequence 1 --dataset "$WORK/s2" --json)
+[ "$(echo "$V1" | jq -r '.verdict')" = "APPROVED" ] && [ "$(echo "$V1" | jq -r '.status_onchain')" = "DIVERGENTE" ] \
+  || { echo "[e2e] FAIL: sequence 1 must be APPROVED with status_onchain DIVERGENTE: $V1"; exit 1; }
+[ "$(echo "$V1" | jq -r '[.checks[].passed] | all')" = "true" ] || { echo "[e2e] FAIL: sequence 1 checks: $V1"; exit 1; }
+echo "[e2e] por-verify sequence 1 --json: $(echo "$V1" | jq -c '{verdict, status_onchain, checks: [.checks[].name]}')"
+verify --sequence 2 --dataset "$WORK/s3" --json | jq -c '{sequence, verdict, status_onchain, mmr: (.checks[] | select(.name=="mmr_consistency") | .detail)}'
+echo "[e2e] por-verify sequence 2: exit 0 (3 roots chained in the MMR)"
+
+echo "[e2e] por-verify rejection paths"
+mkdir -p "$WORK/tampered" && cp "$WORK/s1/signature.json" "$WORK/tampered/"
+python3 - "$WORK/s1/dataset.jsonl" "$WORK/tampered/dataset.jsonl" <<'PYEOF'
+import sys
+b = bytearray(open(sys.argv[1], 'rb').read()); b[len(b)//2] ^= 1; open(sys.argv[2], 'wb').write(b)
+PYEOF
+set +e
+verify --sequence 0 --dataset "$WORK/tampered" > "$WORK/v-tampered.out"; RC_T=$?
+verify --sequence 0 --dataset "$WORK/s2" > "$WORK/v-wrong.out"; RC_W=$?
+verify --sequence 0 --dataset "$WORK/nonexistent" 2> "$WORK/v-unavail.err"; RC_U=$?
+verify --sequence 9 --dataset "$WORK/s1" 2>/dev/null; RC_S=$?
+set -e
+[ "$RC_T" -eq 1 ] && grep -q "FAIL\] dataset_integrity" "$WORK/v-tampered.out" || { echo "[e2e] FAIL: tampered dataset must exit 1 (got $RC_T)"; cat "$WORK/v-tampered.out"; exit 1; }
+[ "$RC_W" -eq 1 ] || { echo "[e2e] FAIL: dataset of another sequence must exit 1 (got $RC_W)"; exit 1; }
+[ "$RC_U" -eq 2 ] && grep -q "VERIFICATION FAILURE" "$WORK/v-unavail.err" || { echo "[e2e] FAIL: unavailable dataset must exit 2 with VERIFICATION FAILURE (got $RC_U)"; cat "$WORK/v-unavail.err"; exit 1; }
+[ "$RC_S" -eq 2 ] || { echo "[e2e] FAIL: unknown sequence must exit 2 (got $RC_S)"; exit 1; }
+echo "[e2e] por-verify: 1-bit tamper -> exit 1; other sequence's dataset -> exit 1; unavailable -> exit 2 (VERIFICATION FAILURE); unknown sequence -> exit 2"
+
+echo "[e2e] por-verify through the IPFS gateway (dataset resolved from AuditRecord.ipfs_cid)"
+ipfs daemon --offline > "$WORK/ipfs-daemon.log" 2>&1 &
+IPFS_PID=$!
+until [ -f "$IPFS_PATH/gateway" ]; do sleep 1; done
+GATEWAY=$(cat "$IPFS_PATH/gateway") # kubo writes the gateway URL (test profile: random port)
+sleep 1
+verify --sequence 0 --gateway "$GATEWAY" --signature "$WORK/s1/signature.json" --json \
+  | jq -c '{sequence, verdict, integrity: (.checks[] | select(.name=="dataset_integrity") | .detail)}'
+echo "[e2e] por-verify sequence 0 via gateway $GATEWAY: exit 0"
+
+echo "[e2e] PASS: end-to-end attestation on localnet (OK + DIVERGENTE + third) and public verification"

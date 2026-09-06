@@ -25,7 +25,14 @@ coverage without trusting a privileged party.
   snapshot, canonical JSONL dataset, sum tree + JCS manifest via `sum-tree`,
   Ed25519 signature, IPFS publish (local kubo, fixed CIDv1 profile) and the
   two-instruction `submit_attestation` transaction.
-- `crates/verifier`, `api/`, `scenarios/` — planned.
+- `crates/verifier` — public verifier CLI `por-verify`: from public data
+  only (on-chain accounts + published dataset) re-executes the four chained
+  checks of the monograph (§4.4: strict Ed25519 signature under the recorded
+  `signer_pubkey`, per-account inclusion, per-node binding over the whole
+  tree, coverage `R_norm >= S` confronted with the recorded `status`) plus
+  the MMR history consistency against `LogState`. Reuses `sum-tree` and the
+  program's account structs; never trusts the attester.
+- `api/`, `scenarios/` — planned.
 
 ## Build and test
 
@@ -57,11 +64,14 @@ slot (they become environment parameters of the evaluation).
 ## End-to-end on localnet (etapa 3)
 
 `./scripts/e2e-localnet.sh` boots a fresh validator and a throwaway kubo
-repo, deploys the program, creates a mint (`decimals = 2`), runs
-`initialize_config`, submits a conforming attestation (`status OK`) and then
-an under-collateralized one (`--haircut-bps 100`, `status DIVERGENTE`).
-Needs `ipfs` (kubo), `spl-token` and `jq` on PATH, plus
-`target/deploy/por-keypair.json` matching the id in `Anchor.toml`.
+repo, deploys the program, creates a mint (`decimals = 2`, fixed test keys
+under `crates/verifier/tests/fixtures/keys`), runs `initialize_config`,
+submits a conforming attestation (`status OK`), an under-collateralized one
+(`--haircut-bps 100`, `status DIVERGENTE`) and a third one, then runs
+`por-verify` on every sequence (see below). Needs `ipfs` (kubo),
+`spl-token`, `jq` and `curl` on PATH, plus `target/deploy/por-keypair.json`
+matching the id in `Anchor.toml`. `RECORD_FIXTURES=1` re-records the
+verifier's frozen fixtures from that run.
 
 ```sh
 por-attest snapshot --n 100 --seed 42 [--haircut-bps 0] --out DIR
@@ -69,6 +79,35 @@ por-attest init-config --mint MINT --keypair KP [--rpc URL]
 por-attest submit --dataset DIR/dataset.jsonl --out DIR --mint MINT --keypair KP [--rpc URL] [--sequence N]
 por-attest show --mint MINT --sequence N [--rpc URL]
 ```
+
+## Public verification (etapa 4)
+
+```sh
+por-verify attestation --mint MINT --sequence N [--rpc URL] [--dataset DIR|CID]
+    [--signature PATH] [--gateway URL] [--program-id ID] [--account HEX64]
+    [--fixtures FILE] [--json]
+```
+
+- `--dataset`: local directory with `dataset.jsonl` (+ `signature.json`) or
+  an IPFS CID fetched from `--gateway` (default: the `ipfs_cid` anchored in
+  the `AuditRecord`). The CID addresses only the dataset bytes, so a CID
+  source needs `--signature PATH` to the `signature.json` sidecar.
+- `--account`: restrict the inclusion check to one `account_id`; default
+  verifies an inclusion proof for every leaf.
+- `--fixtures`: read accounts from a recorded JSON file instead of the RPC
+  (offline tests; see `crates/verifier/tests/fixtures`).
+- Exit codes: `0` approved (a coherent `DIVERGENTE` record **is** approved;
+  the report says `status_onchain: DIVERGENTE`), `1` rejected (any check
+  fails, including `dataset_sha256` mismatch or tampered status), `2`
+  operational error (RPC down, unknown sequence, bad arguments, dataset
+  unavailable — reported as `VERIFICATION FAILURE`, never tacit approval).
+- `--json` emits the `por-verify/1` report: `program_id`, `mint`,
+  `sequence`, `verdict` (`APPROVED`/`REJECTED`), `status_onchain`
+  (`OK`/`DIVERGENTE`), `checks[]` (`dataset_integrity`, `signature`,
+  `inclusion`, `binding`, `coverage`, `mmr_consistency`, each with `passed`
+  and `detail`) and `new_observation` (current supply read when no
+  historical read at `ingestion_slot` is available). Golden copy in
+  `crates/verifier/tests/fixtures/golden_report.json`.
 
 ## License
 
