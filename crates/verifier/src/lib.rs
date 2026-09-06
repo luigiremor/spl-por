@@ -8,4 +8,5 @@ pub mod chain;
 pub mod checks;
 pub mod cli;
 pub mod dataset;
+pub mod pipeline;
 pub mod report;

@@ -1,0 +1,41 @@
+{
+  "schema": "por-verify/1",
+  "program_id": "6KpWoEs5mAdHGpVffKXd2JrE7PRjVa2YxQbCeRvzsa9Y",
+  "mint": "3d7g5XnaMpGfi91LEzU7q3kqjSJoF6qVPEWF1AwbYiXb",
+  "sequence": 0,
+  "verdict": "APPROVED",
+  "status_onchain": "OK",
+  "checks": [
+    {
+      "name": "dataset_integrity",
+      "passed": true,
+      "detail": "sha256 of 10281 published bytes matches anchored dataset_sha256 346bf5e4f280a0d77c0903c0efbb4e7bd54da3a4fa1e622648c82de1bfdcbc08"
+    },
+    {
+      "name": "signature",
+      "passed": true,
+      "detail": "Ed25519 verify_strict ok over 180 canonical bytes under recorded signer_pubkey 3hqct4aiLBtncACxFEWQ12LMXC1TknD9Qtp2g7p5xeZF"
+    },
+    {
+      "name": "inclusion",
+      "passed": true,
+      "detail": "100 inclusion proof(s) verified against anchored root and total"
+    },
+    {
+      "name": "binding",
+      "passed": true,
+      "detail": "root and total 4660446420 confirmed over 100 leaves (checked sums, max_value 1000000000000)"
+    },
+    {
+      "name": "coverage",
+      "passed": true,
+      "detail": "historical path: R_norm=4660446420 vs S=4660446420 at ingestion_slot -> OK, status consistent"
+    },
+    {
+      "name": "mmr_consistency",
+      "passed": true,
+      "detail": "1 attestation(s) chained; 1 peak(s) match LogState"
+    }
+  ],
+  "new_observation": null
+}
