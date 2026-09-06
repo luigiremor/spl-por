@@ -5,4 +5,6 @@
 //!
 //! Academic prototype; not audited, not production-ready.
 pub mod chain;
+pub mod checks;
 pub mod cli;
+pub mod report;
