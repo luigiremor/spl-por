@@ -1,0 +1,17 @@
+scenario,N,metric,value,unit,commit,cluster,timestamp
+s01_exact_coverage_ok,100,pass,1,bool,8411c4a,localnet,2026-09-06T01:09:27.306267Z
+s02_overcollateralized_ok,100,pass,1,bool,8411c4a,localnet,2026-09-06T01:10:06.979669Z
+s03_undercollateralized_divergent,100,pass,1,bool,8411c4a,localnet,2026-09-06T01:10:46.203907Z
+s04_replay_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:11:25.722593Z
+s05_sequence_gap_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:12:04.902318Z
+s06_wrong_mint_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:12:44.643677Z
+s07_wrong_decimals_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:13:24.763031Z
+s08_corrupt_signature_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:15:20.043369Z
+s09_rotated_key_history_approved,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:16:21.135287Z
+s14_dataset_one_byte_tamper_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:17:01.365572Z
+s15_dataset_unavailable_exit2,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:17:40.58735Z
+s16_incoherent_status_rejected,10,pass,1,bool,8411c4a,localnet,2026-09-06T01:18:20.300232Z
+s13_node_as_leaf_rejected,4,pass,1,bool,8411c4a,localnet,2026-09-06T01:18:21.485067Z
+s12_subtotal_overflow_aborts,4,pass,1,bool,8411c4a,localnet,2026-09-06T01:18:21.485508Z
+s11_hu_subtotal_tamper_rejected,100,pass,1,bool,8411c4a,localnet,2026-09-06T01:18:21.487323Z
+s10_corrupt_inclusion_proof_rejected,100,pass,1,bool,8411c4a,localnet,2026-09-06T01:18:21.487685Z
