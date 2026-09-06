@@ -6,3 +6,5 @@ test-ledger/
 .context/
 .localnet-ledger/
 .anchor/
+scenarios/data/
+keys/

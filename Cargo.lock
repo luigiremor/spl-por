@@ -3691,6 +3691,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "scenarios"
+version = "0.1.0"
+dependencies = [
+ "attester",
+ "hex",
+ "sha2 0.10.9",
+ "sum-tree",
+]
+
+[[package]]
 name = "schannel"
 version = "0.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
