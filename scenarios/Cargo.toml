@@ -9,6 +9,10 @@ description = "Evaluation harness for spl-por: deterministic datasets, scenario 
 name = "por-gen"
 path = "src/bin/por_gen.rs"
 
+[[bin]]
+name = "por-measure"
+path = "src/bin/por_measure.rs"
+
 [dependencies]
 sum-tree = { path = "../crates/sum-tree" }
 attester = { path = "../crates/attester" }
