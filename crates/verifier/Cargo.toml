@@ -1,0 +1,34 @@
+[package]
+name = "verifier"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Public proof-of-reserves verifier (por-verify): re-executes the four chained checks plus MMR consistency from public data"
+
+[[bin]]
+name = "por-verify"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+solana-client = "2.3"
+solana-sdk = "2.3"
+anchor-lang = "0.32.1"
+spl-token = { version = "8", features = ["no-entrypoint"] }
+por = { path = "../../programs/por", features = ["no-entrypoint"] }
+sum-tree = { path = "../sum-tree" }
+# 2.x: signature deserialization rejects S >= L; verify_strict additionally
+# rejects small-order components in A and R (same rule as the Ed25519 precompile).
+ed25519-dalek = { version = "2", features = ["std"] }
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hex = "0.4"
+base64 = "0.22"
+ureq = "2"
+thiserror = "1"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = "3"

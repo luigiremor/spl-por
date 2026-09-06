@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["programs/por", "crates/sum-tree", "crates/attester"]
+members = ["programs/por", "crates/sum-tree", "crates/attester", "crates/verifier"]
 
 [workspace.package]
 version = "0.1.0"
