@@ -6,3 +6,4 @@ pub mod cid;
 pub mod ipfs;
 pub mod keys;
 pub mod snapshot;
+pub mod tx;

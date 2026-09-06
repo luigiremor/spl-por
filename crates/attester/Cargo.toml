@@ -20,3 +20,11 @@ clap = { version = "4", features = ["derive"] }
 bs58 = "0.5"
 data-encoding = "2"
 ed25519-dalek = "=1.0.1" # same version pinned by solana-ed25519-program 2.2.3 (new_ed25519_instruction)
+solana-sdk = "2.3"
+solana-client = "2.3"
+# solana_sdk::ed25519_instruction is deprecated since 2.3 in favour of this crate.
+solana-ed25519-program = "2.2"
+anchor-lang = "0.32.1"
+por = { path = "../../programs/por", features = ["no-entrypoint"] }
+spl-token = { version = "8", features = ["no-entrypoint"] }
+time = { version = "0.3", features = ["formatting"] }

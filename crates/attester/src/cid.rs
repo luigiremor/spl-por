@@ -45,7 +45,10 @@ mod tests {
         // profile (version 1, codec raw 0x55, multihash sha2-256 0x12/0x20, base32).
         let cid = compute_single_block_cid_v1_raw(b"hello world").unwrap();
         println!("cid(hello world) = {cid}");
-        assert_eq!(cid, "bafkreifzjut3te2nhyekklss27nh3k72ysco7y32koao5eei66wof36n5e");
+        assert_eq!(
+            cid,
+            "bafkreifzjut3te2nhyekklss27nh3k72ysco7y32koao5eei66wof36n5e"
+        );
     }
 
     #[test]

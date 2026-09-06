@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use solana_sdk::pubkey::Pubkey;
 
 #[derive(Parser)]
 #[command(
@@ -23,6 +24,41 @@ enum Command {
         #[arg(long)]
         out: std::path::PathBuf,
     },
+    /// Create the PorConfig for a mint (payer == admin == oracle_authority in the PoC)
+    InitConfig {
+        #[arg(long)]
+        mint: Pubkey,
+        #[arg(long)]
+        keypair: std::path::PathBuf,
+        #[arg(long, default_value = "http://127.0.0.1:8899")]
+        rpc: String,
+    },
+    /// Publish dataset to IPFS, sign and submit the two-instruction attestation
+    Submit {
+        #[arg(long)]
+        dataset: std::path::PathBuf,
+        /// Directory for manifest.json and signature.json
+        #[arg(long)]
+        out: std::path::PathBuf,
+        #[arg(long)]
+        mint: Pubkey,
+        #[arg(long)]
+        keypair: std::path::PathBuf,
+        #[arg(long, default_value = "http://127.0.0.1:8899")]
+        rpc: String,
+        /// Defaults to PorConfig.next_sequence read from the chain
+        #[arg(long)]
+        sequence: Option<u64>,
+    },
+    /// Fetch and print an AuditRecord as JSON
+    Show {
+        #[arg(long)]
+        mint: Pubkey,
+        #[arg(long)]
+        sequence: u64,
+        #[arg(long, default_value = "http://127.0.0.1:8899")]
+        rpc: String,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -34,6 +70,22 @@ fn main() -> anyhow::Result<()> {
             haircut_bps,
             out,
         } => cmd_snapshot(n, seed, haircut_bps, &out),
+        Command::InitConfig { mint, keypair, rpc } => {
+            attester::tx::init_config(&rpc, &keypair, &mint)
+        }
+        Command::Submit {
+            dataset,
+            out,
+            mint,
+            keypair,
+            rpc,
+            sequence,
+        } => attester::tx::submit(&rpc, &keypair, &mint, &dataset, &out, sequence),
+        Command::Show {
+            mint,
+            sequence,
+            rpc,
+        } => attester::tx::show(&rpc, &mint, sequence),
     }
 }
 
