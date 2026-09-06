@@ -4,4 +4,5 @@
 //! recomputed verdict with the `status` anchored in the `AuditRecord`.
 //!
 //! Academic prototype; not audited, not production-ready.
+pub mod chain;
 pub mod cli;
