@@ -11,7 +11,7 @@ pub use errors::PorError;
 pub use message::*;
 pub use state::*;
 
-declare_id!("6KpWoEs5mAdHGpVffKXd2JrE7PRjVa2YxQbCeRvzsa9Y");
+declare_id!("PoR4VVWSnwt1AAu6ph5S8WtsbtLPgFY2iYbNV1kMDDU");
 
 #[program]
 pub mod por {
