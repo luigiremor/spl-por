@@ -70,6 +70,7 @@ fn main() {
     let env = [
         ("POR_RPC", rpc_url.as_str()),
         ("POR_CLUSTER", "devnet"),
+        ("POR_RECORD", "1"),
         ("POR_PAYER", payer.as_str()),
     ];
     // On-chain matrix S01–S08 against devnet (append-only CSV: start clean).

@@ -492,8 +492,14 @@ pub fn record_header_only(csv: &Path) {
 }
 
 /// Appends one observation: `scenario,N,metric,value,unit,commit,cluster,timestamp`.
+/// No-op unless `POR_RECORD=1`: `results/` is the monograph's data source, so
+/// only deliberate runs (eval-localnet.sh, por-devnet-run) may append to it;
+/// a plain `cargo test` must never touch it.
 pub fn record(csv: &Path, scenario: &str, n: usize, metric: &str, value: f64, unit: &str) {
     use std::io::Write;
+    if std::env::var("POR_RECORD").as_deref() != Ok("1") {
+        return;
+    }
     record_header_only(csv);
     let commit = std::process::Command::new("git")
         .args(["rev-parse", "--short", "HEAD"])

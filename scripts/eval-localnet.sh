@@ -36,7 +36,7 @@ solana -u "$RPC" airdrop 10 "$(solana-keygen pubkey "$DEPLOYER")" >/dev/null
 echo "[eval] deploying program"
 anchor deploy --provider.cluster "$RPC" --provider.wallet "$DEPLOYER" | grep -E 'Program Id|Deploy success'
 
-export POR_RPC="$RPC" POR_CLUSTER=localnet
+export POR_RPC="$RPC" POR_CLUSTER=localnet POR_RECORD=1
 if [ $# -eq 0 ]; then
   rm -f results/matrix-localnet.csv
   cargo test -p scenarios -- --ignored --test-threads=1
