@@ -72,11 +72,25 @@ fn main() {
         return;
     }
 
+    // Isolated kubo repo for multi-block datasets (N >= 10k), as eval-localnet.sh does;
+    // an explicit IPFS_PATH in the environment wins.
+    let ipfs_path = std::env::var("IPFS_PATH").unwrap_or_else(|_| {
+        let p = std::env::temp_dir().join("por-devnet-ipfs");
+        if !p.join("config").exists() {
+            run(
+                "ipfs",
+                &["init", "--profile=test"],
+                &[("IPFS_PATH", p.to_str().unwrap())],
+            );
+        }
+        p.to_string_lossy().into_owned()
+    });
     let env = [
         ("POR_RPC", rpc_url.as_str()),
         ("POR_CLUSTER", "devnet"),
         ("POR_RECORD", "1"),
         ("POR_PAYER", payer.as_str()),
+        ("IPFS_PATH", ipfs_path.as_str()),
     ];
     // On-chain matrix S01–S08 against devnet (append-only CSV: start clean).
     let _ = fs::remove_file(out_dir.join("matrix-devnet.csv"));
