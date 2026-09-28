@@ -17,8 +17,8 @@ fn arg_value(args: &[String], key: &str) -> Option<String> {
         .and_then(|i| args.get(i + 1).cloned())
 }
 
-/// Median of 10 timed runs after 3 discarded warm-ups, in milliseconds.
-fn median_ms(mut f: impl FnMut()) -> f64 {
+/// `[median, min, max]` of 10 timed runs after 3 discarded warm-ups, in ms.
+fn timed_ms(mut f: impl FnMut()) -> [f64; 3] {
     for _ in 0..3 {
         f();
     }
@@ -30,7 +30,7 @@ fn median_ms(mut f: impl FnMut()) -> f64 {
         })
         .collect();
     samples.sort_by(|a, b| a.partial_cmp(b).unwrap());
-    (samples[4] + samples[5]) / 2.0
+    [(samples[4] + samples[5]) / 2.0, samples[0], samples[9]]
 }
 
 /// `por-verify` next to this binary (same cargo profile) or `POR_VERIFY_BIN`.
@@ -61,15 +61,20 @@ fn landed_cu(ctx: &Ctx, sig: &solana_sdk::signature::Signature) -> f64 {
 
 fn measure_n(n: usize, rpc_url: &str, out: &Path) {
     let rec = |metric: &str, value: f64, unit: &str| record(out, "measure", n, metric, value, unit);
+    // median keeps the historical metric name; min/max document the spread
+    let rec_timed = |metric: &str, t: [f64; 3]| {
+        rec(metric, t[0], "ms");
+        rec(&format!("{metric}_min"), t[1], "ms");
+        rec(&format!("{metric}_max"), t[2], "ms");
+    };
     let rows = generate(n, SEED);
 
     // 1) tree construction
-    rec(
+    rec_timed(
         "build_time_ms",
-        median_ms(|| {
+        timed_ms(|| {
             sum_tree::build(&rows, MAX_VALUE).unwrap();
         }),
-        "ms",
     );
     let tree = sum_tree::build(&rows, MAX_VALUE).unwrap();
 
@@ -107,10 +112,9 @@ fn measure_n(n: usize, rpc_url: &str, out: &Path) {
     //    (algorithmic cost only: no RPC latency, no process start-up)
     let dir = write_dataset_dir(&format!("tmp-measure-n{n}"), &ds, &sign(&ctx.oracle, &msg));
     let fixture = FixtureFetcher::from_json(&snapshot_fixture(&ctx).to_string()).unwrap();
-    rec(
+    rec_timed(
         "verify_time_ms",
-        median_ms(|| assert_eq!(verify_with(&fixture, &ctx.mint, 0, Some(&dir)), 0)),
-        "ms",
+        timed_ms(|| assert_eq!(verify_with(&fixture, &ctx.mint, 0, Some(&dir)), 0)),
     );
 
     // 5) end to end: por-verify process + RPC, for transparency
