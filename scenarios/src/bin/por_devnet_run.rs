@@ -35,6 +35,11 @@ fn main() {
         arg_value(&args, "--rpc").unwrap_or_else(|| "https://api.devnet.solana.com".into());
     let out_dir = PathBuf::from(arg_value(&args, "--out-dir").unwrap_or_else(|| "results".into()));
     let payer = arg_value(&args, "--payer").unwrap_or_else(|| "keys/devnet-payer.json".into());
+    // absolute: `cargo test` children run with the crate dir as cwd, not the workspace root
+    let payer = std::fs::canonicalize(&payer)
+        .unwrap_or_else(|e| panic!("payer keypair {payer}: {e}"))
+        .to_string_lossy()
+        .into_owned();
     fs::create_dir_all(&out_dir).unwrap();
 
     let rpc = solana_client::rpc_client::RpcClient::new(rpc_url.clone());
