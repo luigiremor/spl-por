@@ -166,14 +166,21 @@ fn main() {
     let mut tex = format!(
         "% gerado por gen-tables a partir de {} (cluster {})\n\
          \\begin{{tabular}}{{r r r r r r r}}\n\\toprule\n\
-         $N$ & CU & Tx (B) & Constr. (ms) & Verif. (ms) & Prova (passos) & Prova (B) \\\\\n\\midrule\n",
+         $N$ & CU & Tx (B) & Constr. (ms) [mín--máx] & Verif. (ms) [mín--máx] & Prova (passos) & Prova (B) \\\\\n\\midrule\n",
         meas.display(),
         clusters.into_iter().collect::<Vec<_>>().join("+")
     );
     for (n, m) in &by_n {
         tex.push_str(&format!("{n}"));
         for c in cols {
-            tex.push_str(&format!(" & {}", fmt(m.get(c))));
+            // timed metrics carry the spread of the 10 runs when recorded
+            let (lo, hi) = (m.get(&format!("{c}_min")), m.get(&format!("{c}_max")));
+            match (m.get(c), lo, hi) {
+                (Some(_), Some(_), Some(_)) => {
+                    tex.push_str(&format!(" & {} [{}--{}]", fmt(m.get(c)), fmt(lo), fmt(hi)))
+                }
+                _ => tex.push_str(&format!(" & {}", fmt(m.get(c)))),
+            }
         }
         tex.push_str(" \\\\\n");
     }
