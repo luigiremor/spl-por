@@ -1,0 +1,9 @@
+scenario,N,metric,value,unit,commit,cluster,timestamp
+s01_exact_coverage_ok,100,pass,1,bool,ee342fe,devnet,2026-09-28T00:28:26.356828Z
+s02_overcollateralized_ok,100,pass,1,bool,ee342fe,devnet,2026-09-28T00:28:45.580709Z
+s03_undercollateralized_divergent,100,pass,1,bool,ee342fe,devnet,2026-09-28T00:29:04.029178Z
+s04_replay_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:29:15.251253Z
+s05_sequence_gap_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:29:33.735621Z
+s06_wrong_mint_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:29:55.073189Z
+s07_wrong_decimals_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:30:13.538175Z
+s08_corrupt_signature_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:30:33.27933Z
