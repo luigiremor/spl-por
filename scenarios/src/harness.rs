@@ -510,12 +510,11 @@ pub fn record(csv: &Path, scenario: &str, n: usize, metric: &str, value: f64, un
     let ts = time::OffsetDateTime::now_utc()
         .format(&time::format_description::well_known::Rfc3339)
         .unwrap();
+    // one write_all per row: O_APPEND + a single write keeps rows whole when
+    // several test threads/processes append concurrently (writeln! may split)
+    let line = format!("{scenario},{n},{metric},{value},{unit},{commit},{cluster},{ts}\n");
     let mut f = std::fs::OpenOptions::new().append(true).open(csv).unwrap();
-    writeln!(
-        f,
-        "{scenario},{n},{metric},{value},{unit},{commit},{cluster},{ts}"
-    )
-    .unwrap();
+    f.write_all(line.as_bytes()).unwrap();
 }
 
 /// `results/matrix-<cluster>.csv` (POR_CLUSTER, default localnet).

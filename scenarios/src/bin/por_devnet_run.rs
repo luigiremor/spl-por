@@ -104,8 +104,25 @@ fn main() {
             "matrix_conformity",
             "--test",
             "matrix_onchain",
+            "--test",
+            "matrix_verifier",
             "--",
             "--ignored",
+            "--test-threads=1",
+        ],
+        &env,
+    );
+    // S10-S13 are library scenarios (cluster-independent); recorded in the
+    // same CSV so the devnet matrix is complete, as eval-localnet.sh does.
+    run(
+        "cargo",
+        &[
+            "test",
+            "-p",
+            "scenarios",
+            "--test",
+            "matrix_lib",
+            "--",
             "--test-threads=1",
         ],
         &env,

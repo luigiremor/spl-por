@@ -7,3 +7,11 @@ s05_sequence_gap_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:29:33.7356
 s06_wrong_mint_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:29:55.073189Z
 s07_wrong_decimals_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:30:13.538175Z
 s08_corrupt_signature_rejected,10,pass,1,bool,ee342fe,devnet,2026-09-28T00:30:33.27933Z
+s10_corrupt_inclusion_proof_rejected,100,pass,1,bool,741fe41,devnet,2026-09-28T00:37:18.477866Z
+s11_hu_subtotal_tamper_rejected,100,pass,1,bool,741fe41,devnet,2026-09-28T00:37:18.492524Z
+s12_subtotal_overflow_aborts,4,pass,1,bool,741fe41,devnet,2026-09-28T00:37:18.50339Z
+s13_node_as_leaf_rejected,4,pass,1,bool,741fe41,devnet,2026-09-28T00:37:18.513439Z
+s09_rotated_key_history_approved,10,pass,1,bool,741fe41,devnet,2026-09-28T00:39:11.829255Z
+s14_dataset_one_byte_tamper_rejected,10,pass,1,bool,741fe41,devnet,2026-09-28T00:39:20.079324Z
+s15_dataset_unavailable_exit2,10,pass,1,bool,741fe41,devnet,2026-09-28T00:39:38.925831Z
+s16_incoherent_status_rejected,10,pass,1,bool,741fe41,devnet,2026-09-28T00:39:47.864634Z
