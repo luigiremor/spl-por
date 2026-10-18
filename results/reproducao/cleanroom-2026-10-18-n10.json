@@ -1,0 +1,45 @@
+{
+  "schema": "por-verify/1",
+  "program_id": "PoR4VVWSnwt1AAu6ph5S8WtsbtLPgFY2iYbNV1kMDDU",
+  "mint": "FsXE6uHbMiwhj8inCAEAVpN3CNbWd5vFwuBy5AyxE2rC",
+  "sequence": 0,
+  "verdict": "APPROVED",
+  "status_onchain": "OK",
+  "checks": [
+    {
+      "name": "dataset_integrity",
+      "passed": true,
+      "detail": "sha256 of 1029 published bytes matches anchored dataset_sha256 a98f0a6a1edfd5177a18302b5f295b31e56ad922e01bd76ddcb7561223d36ff4"
+    },
+    {
+      "name": "signature",
+      "passed": true,
+      "detail": "Ed25519 verify_strict ok over 180 canonical bytes under recorded signer_pubkey FB7G8NcqLJLKPLoLSaAtrnqX9Dc6BUgrVARcfDmtuWzf"
+    },
+    {
+      "name": "inclusion",
+      "passed": true,
+      "detail": "10 inclusion proof(s) verified against anchored root and total"
+    },
+    {
+      "name": "binding",
+      "passed": true,
+      "detail": "root and total 424109743 confirmed over 10 leaves (checked sums, max_value 100000000000000)"
+    },
+    {
+      "name": "coverage",
+      "passed": true,
+      "detail": "current path: R_norm=4241097430000 vs supply_at_ingestion=4241097430000 -> OK, status consistent; current supply is a new observation"
+    },
+    {
+      "name": "mmr_consistency",
+      "passed": true,
+      "detail": "1 attestation(s) chained; 1 peak(s) match LogState"
+    }
+  ],
+  "new_observation": {
+    "slot": 512592463,
+    "supply": 4241097430000,
+    "covered": true
+  }
+}
