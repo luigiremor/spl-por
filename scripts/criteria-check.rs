@@ -49,6 +49,16 @@ fn read_rows(path: &PathBuf) -> Vec<Row> {
         .collect()
 }
 
+/// Short scenario id of the monograph's tables: "s01_exact_coverage_ok" -> "S01".
+fn short(slug: &str) -> String {
+    slug.split('_').next().unwrap_or(slug).to_uppercase()
+}
+
+/// "1 cenário" / "3 cenários" and alike.
+fn count(n: usize, one: &str, many: &str) -> String {
+    format!("{n} {}", if n == 1 { one } else { many })
+}
+
 fn scenarios_pass(matrix: &[Row], names: &[&str]) -> (bool, String) {
     let missing: Vec<&str> = names
         .iter()
@@ -63,9 +73,13 @@ fn scenarios_pass(matrix: &[Row], names: &[&str]) -> (bool, String) {
         (
             true,
             format!(
-                "{} cenários com resultado igual ao esperado ({})",
-                names.len(),
-                names.join(", ")
+                "{} com resultado igual ao esperado ({})",
+                count(names.len(), "cenário", "cenários"),
+                names
+                    .iter()
+                    .map(|n| short(n))
+                    .collect::<Vec<_>>()
+                    .join(", ")
             ),
         )
     } else {
@@ -101,6 +115,7 @@ fn main() {
             "s08_corrupt_signature_rejected",
             "s10_corrupt_inclusion_proof_rejected",
             "s11_hu_subtotal_tamper_rejected",
+            "s12_subtotal_overflow_aborts",
             "s13_node_as_leaf_rejected",
             "s14_dataset_one_byte_tamper_rejected",
         ],
@@ -110,8 +125,8 @@ fn main() {
         &matrix,
         &[
             "s09_rotated_key_history_approved",
+            "s15_dataset_unavailable_exit2",
             "s16_incoherent_status_rejected",
-            "s01_exact_coverage_ok",
         ],
     );
 
@@ -168,7 +183,10 @@ fn main() {
     } else if c4_fail.is_empty() {
         (
             true,
-            format!("{checked} medições dentro dos tetos declarados (cluster {cluster})"),
+            format!(
+                "{} dentro dos tetos declarados (cluster {cluster})",
+                count(checked, "medição", "medições")
+            ),
         )
     } else {
         (

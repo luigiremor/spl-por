@@ -54,6 +54,11 @@ fn criteria_check_flags_exceedance_and_records_it() {
         md.contains("s02_overcollateralized_ok"),
         "missing scenarios named"
     );
+    // singular for one scenario, and the short ids of the monograph's tables
+    assert!(
+        md.contains("1 cenário com resultado igual ao esperado (S03)"),
+        "{md}"
+    );
     let tex = fs::read_to_string(dir.join("criteria.tex")).unwrap();
     assert!(tex.contains("\\bottomrule") && tex.contains("+50000"));
 }
