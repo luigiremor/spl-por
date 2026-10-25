@@ -67,7 +67,7 @@ const MATRIX: &[(&str, &str, &str, &str, &str)] = &[
         "s08_corrupt_signature_rejected",
         "S08",
         "Assinatura corrompida",
-        "transação rejeitada (precompilado)",
+        "transação rejeitada (\\emph{precompile})",
         "autenticidade",
     ),
     (
@@ -108,14 +108,14 @@ const MATRIX: &[(&str, &str, &str, &str, &str)] = &[
     (
         "s14_dataset_one_byte_tamper_rejected",
         "S14",
-        "\\textit{Dataset} adulterado em 1 byte",
+        "\\emph{dataset} adulterado em 1 byte",
         "reprovado (\\texttt{sha256})",
         "disponibilidade",
     ),
     (
         "s15_dataset_unavailable_exit2",
         "S15",
-        "\\textit{Dataset} indisponível",
+        "\\emph{dataset} indisponível",
         "erro operacional (exit 2)",
         "disponibilidade",
     ),
