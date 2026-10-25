@@ -18,6 +18,8 @@ jobs:
         run: |
           sh -c "$(curl -sSfL https://release.anza.xyz/v2.2.17/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: System libraries for anchor-cli (hidapi needs libudev)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends pkg-config libudev-dev libssl-dev
       - name: Cache Anchor CLI
         id: anchor-cache
         uses: actions/cache@v4
