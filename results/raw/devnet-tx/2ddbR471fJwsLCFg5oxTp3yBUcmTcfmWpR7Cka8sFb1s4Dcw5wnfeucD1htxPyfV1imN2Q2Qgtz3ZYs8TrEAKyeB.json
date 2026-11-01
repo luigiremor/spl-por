@@ -1,0 +1,112 @@
+{
+ "jsonrpc": "2.0",
+ "result": {
+  "blockTime": 1790554978,
+  "meta": {
+   "computeUnitsConsumed": 20111,
+   "costUnits": 21847,
+   "err": null,
+   "fee": 5000,
+   "innerInstructions": [
+    {
+     "index": 0,
+     "instructions": [
+      {
+       "accounts": [
+        0,
+        1
+       ],
+       "data": "11113wZm5g1cVsDhwojTqBPbN9tBCBZ6zo3iQAgJSg2bTn9XgpqG8yzjYDQ6Y2YPZN78tA",
+       "programIdIndex": 3,
+       "stackHeight": 2
+      },
+      {
+       "accounts": [
+        0,
+        2
+       ],
+       "data": "11114FY3F9gNUvv1XMv6h3L2PN34H4pQ6AfxHoZwVwRhYU8bjaws1BeU82qQSfE6QV7u8W",
+       "programIdIndex": 3,
+       "stackHeight": 2
+      }
+     ]
+    }
+   ],
+   "loadedAddresses": {
+    "readonly": [],
+    "writable": []
+   },
+   "logMessages": [
+    "Program PoR4VVWSnwt1AAu6ph5S8WtsbtLPgFY2iYbNV1kMDDU invoke [1]",
+    "Program log: Instruction: InitializeConfig",
+    "Program 11111111111111111111111111111111 invoke [2]",
+    "Program 11111111111111111111111111111111 success",
+    "Program 11111111111111111111111111111111 invoke [2]",
+    "Program 11111111111111111111111111111111 success",
+    "Program PoR4VVWSnwt1AAu6ph5S8WtsbtLPgFY2iYbNV1kMDDU consumed 20111 of 200000 compute units",
+    "Program PoR4VVWSnwt1AAu6ph5S8WtsbtLPgFY2iYbNV1kMDDU success"
+   ],
+   "postBalances": [
+    3112505637,
+    1452880,
+    5938520,
+    1,
+    833120,
+    1066800
+   ],
+   "postTokenBalances": [],
+   "preBalances": [
+    3119902037,
+    0,
+    0,
+    1,
+    833120,
+    1066800
+   ],
+   "preTokenBalances": [],
+   "rewards": [],
+   "status": {
+    "Ok": null
+   }
+  },
+  "slot": 504967080,
+  "transaction": {
+   "message": {
+    "accountKeys": [
+     "Ead6W3JhvHfGncuhVBjvyoCdkGeVCWYUPcB4tbR63MyW",
+     "4dd5dCS4f3moZwnZio5fwXyzkYSTe7b47XpxKztNgQR2",
+     "E9B14UN3VGKXKvhq8U1V2Pu6E52ZQRdhMmdphQ2qqcFA",
+     "11111111111111111111111111111111",
+     "PoR4VVWSnwt1AAu6ph5S8WtsbtLPgFY2iYbNV1kMDDU",
+     "8pp8kvgBvKDQmnG6zyksgThHuFeifKme4sgAGUJfHp44"
+    ],
+    "header": {
+     "numReadonlySignedAccounts": 0,
+     "numReadonlyUnsignedAccounts": 3,
+     "numRequiredSignatures": 1
+    },
+    "instructions": [
+     {
+      "accounts": [
+       1,
+       2,
+       5,
+       0,
+       3
+      ],
+      "data": "B2dN3GTc1kismGakX2uhWdgEpePbRpg2EUy6WboaRJ9tMoXT7Nf3X2Kfmtw7YjP36bLLVNHzs1AQ134QE1MdnTTWAmh9d9AQUXgxBzdPh33RycK",
+      "programIdIndex": 4,
+      "stackHeight": 1
+     }
+    ],
+    "recentBlockhash": "FCKDoSoaMUzrFSqJQKr3BSV2AMkLCphyTYpwrW7aFhtL"
+   },
+   "signatures": [
+    "2ddbR471fJwsLCFg5oxTp3yBUcmTcfmWpR7Cka8sFb1s4Dcw5wnfeucD1htxPyfV1imN2Q2Qgtz3ZYs8TrEAKyeB"
+   ]
+  },
+  "transactionIndex": 25,
+  "version": "legacy"
+ },
+ "id": 1
+}

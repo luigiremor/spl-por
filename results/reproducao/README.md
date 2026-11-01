@@ -14,12 +14,27 @@ verificação de uma atestação ancorada em devnet a partir de dados públicos 
   --rpc https://api.devnet.solana.com --dataset results/devnet-datasets/n10 --json`.
 - Resultado: `verdict = APPROVED`, `status_onchain = OK`, seis verificações aprovadas
   (integridade do conjunto, assinatura, inclusão, binding, cobertura, consistência do MMR),
-  `EXIT=0`. Relatório integral: `cleanroom-2026-10-18-n10.json`. Slot da observação: 512592251.
+  `EXIT=0`. Relatório integral: `cleanroom-2026-10-18-n10.json`. Slot da observação: 512592463
+  (valor do campo `new_observation.slot` do próprio relatório).
 
 Reproduzir: `docker build --platform linux/arm64 -t por-cleanroom . && docker run --rm por-cleanroom`
 (a partir da raiz do repositório, com este `Dockerfile` copiado para lá).
 
-## Modelo de relato para um terceiro (Apêndice D da monografia)
+## Execução de 2026-10-26 (terceiro independente, sem participação do autor)
+
+- Relato integral: `relato.json`, no esquema `por-verify/1`, sem campos de identificação
+  (ver nota de LGPD na Seção 6.5 da monografia).
+- Resultado: `verdict = APPROVED`, `status_onchain = OK`, as seis verificações aprovadas.
+- Observação própria do terceiro: slot 515381431 (2026-10-26 15:49 UTC), supply
+  4241097430000, coberto.
+- SHA-256: `5ba30bfee5220a7ac3a9ac8188aff3e4e973e5df473d09a24d7bd72b31fba7cd`.
+
+Conferência independente deste relato, contra a cadeia e contra os dados versionados:
+o supply do mint em `getTokenSupply` é 4241097430000; `results/devnet-datasets/n10/dataset.jsonl`
+tem 1029 bytes e SHA-256 `a98f0a6a1edfd5177a18302b5f295b31e56ad922e01bd76ddcb7561223d36ff4`,
+ambos idênticos ao que o relato afirma.
+
+## Modelo de relato para um terceiro
 
 Nome, vínculo e data. Máquina (SO, arquitetura, `rustc --version`). Commit do repositório
 usado. Comando executado (acima) e o código de saída. `verdict` e `status_onchain` do JSON.
